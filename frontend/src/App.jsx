@@ -1,35 +1,48 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { Route, Routes, Navigate } from "react-router-dom";
+import "./App.css";
+import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
+import SurveyPage from "./pages/SurveyPage";
+import { mockAuthService } from "./services/mockAuthService";
+import { useEffect } from "react";
+import { toast } from "react-hot-toast";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const user = mockAuthService.getCurrentUser();
+
+  useEffect(() => {
+    // Show welcome back toast if user is logged in
+    if (user) {
+      toast.success(`Welcome back, ${user.name}!`);
+    }
+  }, []);
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <Routes>
+      {/* Public routes */}
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/signup" element={<RegisterPage />} />
+
+      {/* Protected routes */}
+      <Route
+        path="/dashboard"
+        element={
+          user ? (
+            <div>Dashboard Page (Coming Soon)</div>
+          ) : (
+            <Navigate to="/login" />
+          )
+        }
+      />
+      <Route path="/survey" element={<SurveyPage />} />
+
+      {/* Default redirect */}
+      <Route path="/" element={<Navigate to={"/dashboard"} />} />
+
+      {/* 404 route */}
+      <Route path="*" element={<div>404 - Page Not Found</div>} />
+    </Routes>
+  );
 }
 
-export default App
+export default App;
